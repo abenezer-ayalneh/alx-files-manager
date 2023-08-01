@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: files-manager-redis
+    ports:
+      - 6379:6379
+    command: /bin/sh -c "redis-server /etc/redis/redis.conf"
+    volumes:
+      - ./configs/redis.conf:/etc/redis/redis.conf
+
+volumes:
+  data:
+    driver: local
+  configs:
+    driver: local
+
+networks:
+  app-tier:
+    driver: bridge
