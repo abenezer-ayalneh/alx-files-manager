@@ -7,6 +7,19 @@ services:
     command: /bin/sh -c "redis-server /etc/redis/redis.conf"
     volumes:
       - ./configs/redis.conf:/etc/redis/redis.conf
+  
+  mongodb:
+    image: mongo:latest
+    container_name: files-manager-mongo-db
+    env_file:
+      - ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo/db:/data/db
 
 volumes:
   data:

@@ -7,14 +7,16 @@ class RedisClient {
 
   constructor() {
     this.redisClient = createClient({
-      url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+      url: `redis://${process.env.REDIS_USERNAME ?? 'root'}:${process.env.REDIS_PASSWORD ?? 'passpass'}@${
+        process.env.REDIS_HOST ?? 'localhost'
+      }:${process.env.REDIS_PORT ?? 6379}`,
     })
     this.redisClient.on('error', (err) => console.log('Redis Client Error', err))
     this.redisClient.connect()
   }
 
-  async isAlive() {
-    return this.redisClient.isReady
+  isAlive() {
+    return this.redisClient.isOpen
   }
 
   async get(key: string) {
