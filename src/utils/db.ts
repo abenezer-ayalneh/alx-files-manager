@@ -6,18 +6,21 @@ class DBClient {
 
   constructor() {
     this.mongoClient = new MongoClient(
-      `mongodb://${process.env.MONGO_DB_USER ?? 'mongouser'}:${process.env.MONGO_DB_PASSWORD ?? 'passpass'}@${process.env.MONGO_DB_HOST ?? 'localhost'}:${process.env.MONGO_DB_PORT ?? 27017}`
+      `mongodb://${process.env.MONGO_DB_USER ?? 'mongouser'}:${process.env.MONGO_DB_PASSWORD ?? 'passpass'}@${
+        process.env.MONGO_DB_HOST ?? 'localhost'
+      }:${process.env.MONGO_DB_PORT ?? 27017}?authMechanism=DEFAULT`
     )
     this.mongoClient.db(process.env.MONGO_DB_DATABASE ?? 'files_manager')
+    this.mongoClient.connect()
   }
 
   async isAlive() {
-    await this.mongoClient.connect()
     try {
       await this.mongoClient.db().admin().ping()
     } catch (error) {
       return false
     }
+
     return true
   }
 

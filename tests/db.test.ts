@@ -4,7 +4,7 @@ const waitConnection = () => {
     return new Promise((resolve, reject) => {
         let i = 0;
         const repeatFct = async () => {
-            await setTimeout(() => {
+            await setTimeout(async () => {
                 i += 1;
                 if (i >= 10) {
                     reject()
