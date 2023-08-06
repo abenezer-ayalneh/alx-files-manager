@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import AppController from '../controllers/AppController'
+import AppController from '../controllers/app/AppController'
 
 export const router = express.Router()
 
