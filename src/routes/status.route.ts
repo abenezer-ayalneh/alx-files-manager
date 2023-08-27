@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express'
 import AppController from '../controllers/app/AppController'
 
-export const router = express.Router()
+export const statusRouter = express.Router()
 
-router.get('/', (req: Request, res: Response) => res.send('Hello World!'))
-router.get('/status', AppController.getStatus)
-router.get('/stats', AppController.getStats)
+statusRouter.get('/', (req: Request, res: Response) => res.send('Hello World!'))
+statusRouter.get('/status', AppController.getStatus)
+statusRouter.get('/stats', AppController.getStats)
