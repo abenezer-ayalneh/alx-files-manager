@@ -11,7 +11,7 @@ class RedisClient {
         process.env.REDIS_HOST ?? 'localhost'
       }:${process.env.REDIS_PORT ?? 6379}`,
     })
-    this.redisClient.on('error', (err) => console.log('Redis Client Error', err))
+    this.redisClient.on('error', (err) => console.error('Redis Client Error', err))
     this.redisClient.connect()
   }
 

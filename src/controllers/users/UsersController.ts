@@ -6,7 +6,6 @@ import crypto from 'crypto'
 
 export default class UsersController {
   static postNew = async (req: Request, resp: Response) => {
-    console.log({ body: req.body })
     const createUserDto = new CreateUserDto()
     createUserDto.email = req.body?.email
     createUserDto.password = req.body?.password
@@ -21,7 +20,7 @@ export default class UsersController {
       .collection('users')
       .findOne({ email: req.body?.email })
     if (emailExists) {
-      resp.status(400).send('Already exist')
+      resp.status(400).json({'error': 'Already exist'})
     }
 
     const hashedPassword = crypto
@@ -34,7 +33,7 @@ export default class UsersController {
         .db()
         .collection('users')
         .insertOne({ email: req.body?.email, password: hashedPassword })
-      return user
+      resp.json(user)
     } catch (error) {
       console.error({ error })
     }
