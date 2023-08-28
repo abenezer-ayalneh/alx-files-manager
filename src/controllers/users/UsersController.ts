@@ -5,14 +5,14 @@ import { CreateUserDto } from './dto/create-user.dto'
 import crypto from 'crypto'
 
 export default class UsersController {
-  static postNew = async (req: Request, resp: Response) => {
+  static async postNew(req: Request, resp: Response) {
     const createUserDto = new CreateUserDto()
     createUserDto.email = req.body?.email
     createUserDto.password = req.body?.password
 
     const errors = await validate(createUserDto)
     if (errors.length > 0) {
-      return resp.status(400).send(errors[0].constraints)
+      return resp.status(400).send(errors.map((error) => error.constraints))
     }
 
     const emailExists = await dbClient.mongoClient
