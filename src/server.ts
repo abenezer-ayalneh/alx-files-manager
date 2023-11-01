@@ -8,7 +8,7 @@ const app = express()
 app.use(express.json())
 app.use('/', statusRouter)
 app.use('/users', usersRouter)
-app.use('/auth', authRouter)
+app.use('/', authRouter)
 
-app.listen(process.env.APP_PORT ?? 5000)
+app.listen(process.env.APP_PORT ?? 5000, () => console.log(`Application listening on port ${process.env.APP_PORT ?? 5000}`))
 
