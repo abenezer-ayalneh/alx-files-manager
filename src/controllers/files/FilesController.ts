@@ -14,7 +14,7 @@ export default class FilesController {
     const user = req.user
 
     // Validating the
-    const errors = await this.requestValidation(req.body)
+    const errors = await FilesController.requestValidation(req.body)
     if (errors.length > 0) {
       return res.status(400).send(errors.map((error) => error.constraints))
     }

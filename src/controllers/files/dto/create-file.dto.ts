@@ -10,10 +10,9 @@ export class CreateFileDto {
   @IsNotEmpty()
   type: 'folder' | 'file' | 'image'
 
-  @IsNumber()
-  @Type(() => Number)
+  @IsString()
   @IsOptional()
-  parentId: number = 0
+  parentId: string
 
   @IsBoolean()
   @Type(() => Boolean)
