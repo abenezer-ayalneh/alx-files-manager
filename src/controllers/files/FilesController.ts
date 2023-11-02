@@ -81,6 +81,34 @@ export default class FilesController {
     }
   }
 
+  static async getIndex(req: Request, res: Response) {
+    const parentId = req.body.parentId
+    const page = req.body.page
+    const files = []
+
+    if (parentId) {
+    }
+  }
+
+  static async getShow(req: Request, res: Response) {
+    const fileId = req.params.id
+
+    try {
+      const file = await dbClient.mongoClient
+        .db()
+        .collection('files')
+        .findOne({ _id: new ObjectId(fileId), userId: req.user._id })
+
+      if (!file) {
+        return res.status(404).send({ error: 'Not found' })
+      }
+
+      return res.status(200).json({ file })
+    } catch (e) {
+
+    }
+  }
+
   private static async requestValidation(body: any) {
     const createFileDto = new CreateFileDto()
     createFileDto.name = body.name
