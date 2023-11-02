@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { DisconnectDto } from './dto/disconnect.dto'
 
 export class AuthController {
-  static async getConnect(req: Request, resp: Response) {
+  static async getConnect(req: Request, res: Response) {
     const credentialDto = new ConnectDto()
     const credential = req.headers.authorization?.replace('Basic ', '')
     credentialDto.credential = credential
@@ -17,7 +17,7 @@ export class AuthController {
     const errors = await validate(credentialDto)
 
     if (errors.length > 0) {
-      return resp.status(400).send(errors.map((error) => error.constraints))
+      return res.status(400).send(errors.map((error) => error.constraints))
     }
 
     // Decode base64 to bytes
@@ -40,32 +40,32 @@ export class AuthController {
         const key = `auth_${token}`
         redisClient.set(key, user._id.toString(), 86400)
 
-        resp.status(200).json({ token: token })
+        res.status(200).json({ token: token })
       } else {
-        resp.status(401).json({ error: 'Password mismatch' })
+        res.status(401).json({ error: 'Password mismatch' })
       }
     } else {
-      resp.status(401).json({ error: 'User not found' })
+      res.status(401).json({ error: 'User not found' })
     }
   }
 
-  static async getDisconnect(req: Request, resp: Response) {
+  static async getDisconnect(req: Request, res: Response) {
     const token = req.headers['x-token'] as string
     const disconnectDto = new DisconnectDto()
     disconnectDto.token = token
 
     const errors = await validate(disconnectDto)
     if (errors.length > 0) {
-      return resp.status(400).send(errors.map((error) => error.constraints))
+      return res.status(400).send(errors.map((error) => error.constraints))
     }
 
     const redisKey = `auth_${token}`
     const redisEntry = await redisClient.get(redisKey)
     if (redisEntry) {
       await redisClient.del(redisKey)
-      resp.status(204)
+      res.status(204)
     } else {
-      resp.status(401).json({ error: 'User not found' })
+      res.status(401).json({ error: 'User not found' })
     }
   }
 }
