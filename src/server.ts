@@ -4,12 +4,14 @@ import {statusRouter} from './routes/status.route'
 import {usersRouter} from './routes/user.route'
 import {authRouter} from './routes/auth.route'
 import { filesRouter } from "./routes/file.route";
+import { authMiddleware } from "./utils/middlewares/auth.middleware";
 require('dotenv').config()
 
 const app = express()
 app.use(express.json())
 app.use('/', statusRouter)
 app.use('/', authRouter)
+app.use(authMiddleware)
 app.use('/users', usersRouter)
 app.use('/files', filesRouter)
 

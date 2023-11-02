@@ -1,4 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export class User {
-  email: string | undefined
-  password: string | undefined
+  _id: ObjectId
+  email?: string
+  password?: string
 }
