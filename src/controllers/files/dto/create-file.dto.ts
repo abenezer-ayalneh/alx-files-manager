@@ -12,7 +12,7 @@ export class CreateFileDto {
 
   @IsString()
   @IsOptional()
-  parentId: string
+  parentId: string  = '0'
 
   @IsBoolean()
   @Type(() => Boolean)
