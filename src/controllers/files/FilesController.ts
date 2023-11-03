@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { Request, Response } from 'express'
+import { File } from "./models/file.model";
 
 export default class FilesController {
   static async postUpload(req: Request, res: Response) {
@@ -78,6 +79,62 @@ export default class FilesController {
       } catch (e) {
         return res.status(500).send({ error: "DB: can't store the document" })
       }
+    }
+  }
+
+  static async getIndex(req: Request, res: Response) {
+    const user = req.user
+    const parentId = req.query.parentId as string|null
+    // Number of files to show per page
+    const itemsPerPage = parseInt(process.env.ITEMS_PER_PAGE ?? '20')
+    // Page number to paginate with
+    const page = (req.query.page ?? 0) as number
+    // Calculate the skip value to determine where to start the page
+    const skip = page  * itemsPerPage
+    // Query to run on the match section
+    const query: Partial<File> = {}
+    query.parentId = parentId ? new ObjectId(parentId) : null
+    query.userId = user._id
+
+
+    try {
+      const files = await dbClient.mongoClient
+        .db()
+        .collection('files')
+        .aggregate([
+          {
+            $match: query, // Apply the query for parent ID and the authenticated user
+          },
+          {
+            $skip: skip, // Skip documents to start from a specific page
+          },
+          {
+            $limit: itemsPerPage, // Limit the number of documents to fetch per page
+          },
+        ])
+        .toArray()
+      return res.status(200).json({ files })
+    } catch (e) {
+      return res.status(500).send({ error: "DB: couldn't fetch files" })
+    }
+  }
+
+  static async getShow(req: Request, res: Response) {
+    const fileId = req.params.id
+
+    try {
+      const file = await dbClient.mongoClient
+        .db()
+        .collection('files')
+        .findOne({ _id: new ObjectId(fileId), userId: req.user._id })
+
+      if (!file) {
+        return res.status(404).send({ error: 'Not found' })
+      }
+
+      return res.status(200).json({ file })
+    } catch (e) {
+      return res.status(500).send({ error: "DB: couldn't fetch file" })
     }
   }
 

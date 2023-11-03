@@ -2,10 +2,10 @@ import { ObjectId } from "mongodb";
 
 export class File {
   _id: ObjectId
-  userId: string
+  userId: ObjectId
   name: string
   type: string
   isPublic?: string
-  parentId?:  number
+  parentId:  ObjectId | null
   localPath?: string
 }
