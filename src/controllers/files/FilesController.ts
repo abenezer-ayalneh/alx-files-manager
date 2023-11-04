@@ -41,9 +41,11 @@ export default class FilesController {
     // If the type is folder, add the new file document in the DB and return the new file with a status code 201
     if (requestData.type === 'folder') {
       const newFolder = await dbClient.mongoClient.db().collection('files').insertOne({
+        userId: user._id,
         name: requestData.name,
         type: requestData.type,
         parentId: requestData.parentId,
+        isPublic: requestData.isPublic,
       })
 
       return res.status(201).json(newFolder)
@@ -96,7 +98,7 @@ export default class FilesController {
     const skip = page * itemsPerPage
     // Query to run on the match section
     const query: Partial<File> = {}
-    query.parentId = parentId ? new ObjectId(parentId) : null
+    query.parentId = parentId ? new ObjectId(parentId) : '0'
     query.userId = user._id
 
     try {
