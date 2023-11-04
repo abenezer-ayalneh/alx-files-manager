@@ -63,9 +63,9 @@ export class AuthController {
     const redisEntry = await redisClient.get(redisKey)
     if (redisEntry) {
       await redisClient.del(redisKey)
-      res.status(204)
+      return res.status(204).send()
     } else {
-      res.status(401).json({ error: 'User not found' })
+      return res.status(401).json({ error: 'User not found' })
     }
   }
 }
