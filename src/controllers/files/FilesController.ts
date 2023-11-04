@@ -10,6 +10,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { Request, Response } from 'express'
 import { File } from './models/file.model'
 import { plainToInstance } from 'class-transformer'
+import { lookup } from 'mime-types'
 
 export default class FilesController {
   static async postUpload(req: Request, res: Response) {
@@ -185,6 +186,36 @@ export default class FilesController {
       return res.status(200).json({ file: updatedFile.value })
     } catch (e) {
       return res.status(500).send({ error: "DB: couldn't fetch file" })
+    }
+  }
+
+  static async getFile(req: Request, res: Response) {
+    const fileId = req.params.id
+    const fileFromDb = (await dbClient.mongoClient
+      .db()
+      .collection('files')
+      .findOne({ _id: new ObjectId(fileId) })) as File
+
+    if (!fileFromDb) {
+      return res.status(404).send({ error: 'Not found' })
+    }
+
+    if (!fileFromDb.isPublic || fileFromDb.userId === req.user._id) {
+      return res.status(404).send({ error: 'Not found' })
+    }
+    if (fileFromDb.type === 'folder') {
+      return res.status(400).send({ error: "A folder doesn't have content" })
+    }
+
+    if (!fileFromDb.localPath || (fileFromDb.localPath && !existsSync(fileFromDb.localPath))) {
+      return res.status(404).send({ error: 'Not found' })
+    }
+
+    const mimeType = lookup(fileFromDb.name)
+    if (mimeType) {
+      return res.status(200).setHeader("content-type", mimeType).sendFile(fileFromDb.localPath)
+    } else {
+      return res.status(500).send({ error: 'File: no mime type found' })
     }
   }
 }
