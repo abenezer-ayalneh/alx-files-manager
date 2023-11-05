@@ -12,7 +12,6 @@ import { File } from "./models/file.model";
 import { plainToInstance } from "class-transformer";
 import { lookup } from "mime-types";
 import { GetFileByIdDto } from "./dto/get-file-by-id.dto";
-import { fileQueue } from "../../utils/queues/file.queue";
 
 export default class FilesController {
   static async postUpload(req: Request, res: Response) {
@@ -82,9 +81,9 @@ export default class FilesController {
           localPath: filePath,
         })
 
-        if (requestData.type === 'i"image"{
-          fileQueue.add({ fileId: newFile.insertedId, userId: user._id })
- ;       }
+        if (requestData.type === 'image') {
+    "image"ileQueue.add({ fileId: newFile.insertedId, userId: user._id })
+        }
         return res.status(201).json(newFile)
       } catch (e) {
         return res.status(500).send({ error: "DB: can't store the document" })
