@@ -4,5 +4,5 @@ export class DisconnectDto {
   @IsUUID()
   @IsString()
   @IsNotEmpty()
-  token: string | undefined
+  token: string
 }

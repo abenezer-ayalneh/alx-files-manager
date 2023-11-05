@@ -6,6 +6,6 @@ export class File {
   name: string
   type: string
   isPublic?: string
-  parentId:  ObjectId | null
+  parentId:  ObjectId | string
   localPath?: string
 }
