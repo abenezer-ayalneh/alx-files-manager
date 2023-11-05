@@ -1,16 +1,18 @@
-import { CreateFileDto } from './dto/create-file.dto'
-import { validate } from 'class-validator'
-import dbClient from '../../utils/db'
-import { ObjectId } from 'mongodb'
-import { writeFile } from 'fs/promises'
-import * as process from 'process'
-import { v4 as uuidv4 } from 'uuid'
-import { join } from 'path'
-import { existsSync, mkdirSync } from 'fs'
-import { Request, Response } from 'express'
-import { File } from './models/file.model'
-import { plainToInstance } from 'class-transformer'
-import { lookup } from 'mime-types'
+import { CreateFileDto } from "./dto/create-file.dto";
+import { validate } from "class-validator";
+import dbClient from "../../utils/db";
+import { ObjectId } from "mongodb";
+import { writeFile } from "fs/promises";
+import * as process from "process";
+import { v4 as uuidv4 } from "uuid";
+import { join } from "path";
+import { existsSync, mkdirSync } from "fs";
+import { Request, Response } from "express";
+import { File } from "./models/file.model";
+import { plainToInstance } from "class-transformer";
+import { lookup } from "mime-types";
+import { GetFileByIdDto } from "./dto/get-file-by-id.dto";
+import { fileQueue } from "../../utils/queues/file.queue";
 
 export default class FilesController {
   static async postUpload(req: Request, res: Response) {
@@ -80,6 +82,9 @@ export default class FilesController {
           localPath: filePath,
         })
 
+        if (requestData.type === 'i"image"{
+          fileQueue.add({ fileId: newFile.insertedId, userId: user._id })
+ ;       }
         return res.status(201).json(newFile)
       } catch (e) {
         return res.status(500).send({ error: "DB: can't store the document" })
@@ -193,6 +198,13 @@ export default class FilesController {
 
   static async getFile(req: Request, res: Response) {
     const fileId = req.params.id
+    // Validate the size field
+    const requestData = plainToInstance(GetFileByIdDto, req.query);
+    const errors = await validate(requestData);
+    if (errors.length > 0) {
+      return res.status(400).send(errors.map((error) => error.constraints));
+    }
+
     const fileFromDb = (await dbClient.mongoClient
       .db()
       .collection('files')
@@ -213,9 +225,14 @@ export default class FilesController {
       return res.status(404).send({ error: 'Not found' })
     }
 
+    if (!fileFromDb.localPath && requestData.size && !existsSync(fileFromDb.localPath + `_${requestData.size}`)) {
+      return res.status(404).send({ error: "Not found" });
+    }
+
     const mimeType = lookup(fileFromDb.name)
     if (mimeType) {
-      return res.status(200).setHeader("content-type", mimeType).sendFile(fileFromDb.localPath)
+      const filePath = requestData.size ? fileFromDb.localPath + `_${requestData.size}` : fileFromDb.localPath;
+      return res.status(200).setHeader("content-type", mimeType).sendFile(filePath);
     } else {
       return res.status(500).send({ error: 'File: no mime type found' })
     }
