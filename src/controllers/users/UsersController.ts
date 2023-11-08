@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import dbClient from '../../utils/db'
 import { CreateUserDto } from './dto/create-user.dto'
 import crypto from 'crypto'
+import { userQueue } from '../../utils/queues/user.queue'
 
 export default class UsersController {
   static async postNew(req: Request, res: Response) {
@@ -20,7 +21,7 @@ export default class UsersController {
       .collection('users')
       .findOne({ email: req.body?.email })
     if (emailExists) {
-      res.status(400).json({ error: 'Already exist' })
+      return res.status(400).json({ error: 'Already exist' })
     }
 
     const hashedPassword = crypto
@@ -33,7 +34,8 @@ export default class UsersController {
         .db()
         .collection('users')
         .insertOne({ email: req.body?.email, password: hashedPassword })
-      res.json(user)
+      userQueue.add({ userId: user.insertedId })
+      return res.json(user)
     } catch (error) {
       console.error({ error })
     }
