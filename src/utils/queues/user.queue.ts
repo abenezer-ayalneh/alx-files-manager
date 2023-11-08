@@ -4,6 +4,7 @@ import dbClient from '../db'
 import { ObjectId } from 'mongodb'
 import { User } from '../../controllers/users/models/user.model'
 import * as process from 'process'
+import nodemailer from 'nodemailer'
 
 type UserQueueDataType = {
   userId: ObjectId
@@ -31,27 +32,24 @@ const sendWelcomeMail = async (data: UserQueueDataType) => {
   if (!user) {
     throw new Error('User not found')
   } else {
-    // try {
-    //   const transporter = nodemailer.createTransport({
-    //     host: process.env.MAIL_HOST ?? 'sandbox.smtp.mailtrap.io',
-    //     port: parseInt(process.env.MAIL_PORT ?? '2525'),
-    //     secure: true,
-    //     auth: {
-    //       user: process.env.MAIL_USER ?? '4c720ec91875a6',
-    //       pass: process.env.MAIL_PASSWORD ?? '6d0adaea9369f7',
-    //     },
-    //   })
-    //
-    //   const info = await transporter.sendMail({
-    //     from: process.env.MAIL_FROM ?? 'support@files-manager.com',
-    //     to: 'bar@example.com, baz@example.com', // list of receivers
-    //     subject: `Welcome`, // Subject line
-    //     text: 'Welcome, ${user.email}! We would like to thank you for using our platform', // plain text body
-    //   })
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.MAIL_HOST ?? 'sandbox.smtp.mailtrap.io',
+        port: parseInt(process.env.MAIL_PORT ?? '2525'),
+        auth: {
+          user: process.env.MAIL_USER ?? '4c720ec91875a6',
+          pass: process.env.MAIL_PASSWORD ?? '6d0adaea9369f7',
+        },
+      })
 
-      console.log(`Welcome ${user.email}!`)
-    // } catch (err) {
-    //   console.error({ err })
-    // }
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM ?? 'support@files-manager.com',
+        to: 'bar@example.com, baz@example.com', // list of receivers
+        subject: `Welcome`, // Subject line
+        text: `Welcome, ${user.email}! We would like to thank you for using our platform`, // plain text body
+      })
+    } catch (err) {
+      console.error({ err })
+    }
   }
 }
